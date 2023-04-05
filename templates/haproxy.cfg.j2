@@ -1,0 +1,34 @@
+{% if haproxy_global | length > 0 %}
+global
+  {{ haproxy_global | indent(width=2)}}
+{% endif %}
+{% if haproxy_defaults | length > 0 %}
+defaults
+  {{ haproxy_defaults | indent(width=2)}}
+{% endif %}
+{% for frontend in haproxy_frontends | default([]) %}
+frontend {{ frontend.name }}
+{% for port in frontend.ports|default([]) %}
+  bind {{ port }}
+{% endfor %}
+  mode {{ frontend.mode | default("tcp") }}
+{% for option in frontend.options | default([]) %}
+  option {{ option }}
+{% endfor %}
+  use_backend {{ frontend.backend | default(frontend.name) }}
+
+{% endfor %}
+{% for backend in haproxy_backends | default([]) %}
+backend {{ backend.name }}
+  mode {{ backend.mode | default("tcp") }}
+{% for option in backend.options | default([]) %}
+  option {{ option }}
+{% endfor %}
+{% for httpcheck in backend.httpchecks | default([]) %}
+  http-check {{ httpcheck }}
+{% endfor %}
+{% for server in backend.servers | default([]) %}
+  server {{ server }} {{ backend.servers_opts | default("") }}
+{% endfor %}
+
+{% endfor %}

@@ -1,0 +1,17 @@
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "include haproxy vars"
+      include_vars:
+        file: "vars.yml"
+
+    - name: "create haproxy_group"
+      add_host:
+        name: "{{ item }}"
+        groups: "{{ haproxy_group }}"
+      with_items: 
+        - "{{ ansible_play_hosts }}"
+
+    - name: "haproxy"
+      import_role:
+        name: "haproxy"

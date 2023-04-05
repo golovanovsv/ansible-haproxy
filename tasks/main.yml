@@ -1,0 +1,32 @@
+- name: "Haproxy | add external repository"
+  block:
+    - name: "Haproxy | add repository key"
+      apt_key:
+        url: "{{ haproxy_repo_key }}"
+        state: "present"
+
+    - name: "Haproxy | add repository"
+      apt_repository:
+        repo: "{{ haproxy_repo }}"
+        state: "present"
+  when: haproxy_repo | length > 0
+
+- name: "Haproxy | install haproxy"
+  apt:
+    name: "haproxy"
+    state: "present"
+    update_cache: true
+    install_recommends: false
+
+- name: "Haproxy | configure haproxy"
+  template:
+    src: "haproxy.cfg.j2"
+    dest: "/etc/haproxy/haproxy.cfg"
+    mode: "644"
+  register: haproxy_conf
+
+- name: "Haprosy | start service"
+  systemd:
+    name: "haproxy"
+    enabled: true
+    state: "{{ 'restarted' if haproxy_conf.changed else 'started' }}"

@@ -1,0 +1,47 @@
+haproxy_group: "haproxy"
+# "2.6" is latest LTS version
+# https://docs.haproxy.org/
+haproxy_version: "2.6"
+
+haproxy_repo: >-
+  deb http://ppa.launchpad.net/vbernat/haproxy-{{ haproxy_version }}/{{ ansible_distribution | lower }}
+  {{ ansible_distribution_release }} main
+haproxy_repo_key: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xcffb779aadc995e4f350a060505d97a41c61b9cd"
+
+haproxy_global: |
+  log /dev/log  local0
+
+haproxy_defaults: |
+  log global
+  timeout client 30s
+  timeout connect 4s
+  timeout server 30s
+
+haproxy_frontends: []
+# - name: "kubernetes-api"
+#   ports:
+#     - "*:443"
+#   mode: "http"
+#   options:
+#     - "tcplog"
+
+haproxy_backends: []
+# - name: "kubernetes-api"
+#   mode: "http"
+#   options:
+#     - "httpchk"
+#     - "log-health-checks"
+#   httpchecks:
+#     - "connect"
+#     - "send meth GET uri /healthz"
+#     - "expect status 200"
+#   # servers собирает структуру "<short-name> <ansible_host>:6443"
+#   # из группы haproxy_group
+#   servers: >-
+#     {{
+#     groups[haproxy_group] | map('extract', hostvars) | map(attribute='inventory_hostname_short') |
+#     zip(groups[haproxy_group] | map('extract', hostvars) | map(attribute='ansible_service_mgr')
+#     | map('regex_replace', '$', ':6443'))
+#     | map('join', ' ') | list
+#     }}
+#   servers_opts: "check check-ssl verify none"
